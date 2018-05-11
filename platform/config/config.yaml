@@ -11,3 +11,5 @@ stacks:
       tags:
         app: ${app}
         env: ${env}
+      exports:
+        VideoUploadBucketARN: 'arn:aws:s3:::$\{BucketName}'

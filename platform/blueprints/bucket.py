@@ -1,3 +1,4 @@
+from __future__ import print_function
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import (
     TroposphereType,
@@ -7,6 +8,9 @@ from troposphere import (
     s3,
     Ref,
     Tags,
+    Output,
+    Sub,
+    Export,
 )
 
 class Bucket(Blueprint):
@@ -17,6 +21,9 @@ class Bucket(Blueprint):
         },
         'tags': {
             'type': dict,
+        },
+        'exports': {
+            'type': dict,
         }
     }
     def create_template(self):
@@ -25,3 +32,6 @@ class Bucket(Blueprint):
         t.add_resource(s3.Bucket('Bucket',
                                  BucketName=Ref('BucketName'),
                                  Tags=Tags(variables['tags'])))
+        for k, v in variables['exports'].iteritems():
+            v = v.replace('$\{', '${')
+            t.add_output(Output(k, Value=Sub(v), Export=Export(k)))
