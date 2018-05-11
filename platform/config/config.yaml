@@ -1,0 +1,13 @@
+---
+sys_path: .
+stacker_bucket: '' # Disable running CF from bucket, run directly from here
+
+stacks:
+  - name: video-upload-bucket
+    class_path: blueprints.bucket.Bucket
+    enabled: true
+    variables:
+      BucketName: a1b1-${app}-${env}-video-upload
+      tags:
+        app: ${app}
+        env: ${env}
