@@ -1,7 +1,7 @@
 from __future__ import print_function
+
 from stacker.blueprints.base import Blueprint
 from stacker.blueprints.variables.types import (
-    TroposphereType,
     CFNString,
 )
 from troposphere import (
@@ -9,9 +9,10 @@ from troposphere import (
     Ref,
     Tags,
     Output,
-    Sub,
     Export,
+    Sub,
 )
+
 
 class Bucket(Blueprint):
     VARIABLES = {
@@ -26,6 +27,7 @@ class Bucket(Blueprint):
             'type': dict,
         }
     }
+
     def create_template(self):
         t = self.template
         variables = self.get_variables()
