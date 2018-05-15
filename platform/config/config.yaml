@@ -3,6 +3,16 @@ sys_path: .
 stacker_bucket: '' # Disable running CF from bucket, run directly from here
 
 stacks:
+  - name: deployment-bucket
+    class_path: blueprints.bucket.Bucket
+    enabled: true
+    variables:
+      BucketName: a1b1-${app}-${env}-deployment
+      tags:
+        app: ${app}
+        env: ${env}
+      exports:
+        DeploymentBucket: '$\{BucketName}'
   - name: video-upload-bucket
     class_path: blueprints.bucket.Bucket
     enabled: true
@@ -12,7 +22,7 @@ stacks:
         app: ${app}
         env: ${env}
       exports:
-        VideoUploadBucketARN: 'arn:aws:s3:::$\{BucketName}'
+        VideoUploadBucket: '$\{BucketName}'
   - name: video-download-bucket
     class_path: blueprints.bucket.Bucket
     enabled: true
@@ -22,4 +32,4 @@ stacks:
         app: ${app}
         env: ${env}
       exports:
-        VideoDownloadBucketARN: 'arn:aws:s3:::$\{BucketName}'
+        VideoDownloadBucket: '$\{BucketName}'

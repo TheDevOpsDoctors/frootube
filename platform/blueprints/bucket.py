@@ -25,6 +25,7 @@ class Bucket(Blueprint):
         },
         'exports': {
             'type': dict,
+            'default': {}
         }
     }
 

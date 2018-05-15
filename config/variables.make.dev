@@ -1,0 +1,3 @@
+AWS_PROFILE=frootube-$(ENV)
+AWS_REGION=eu-west-1
+APP=frootube
