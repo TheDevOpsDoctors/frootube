@@ -11,7 +11,7 @@ from troposphere import (
     Output,
     Export,
     Sub,
-)
+    sns)
 
 
 class Bucket(Blueprint):
@@ -29,12 +29,85 @@ class Bucket(Blueprint):
         }
     }
 
-    def create_template(self):
-        t = self.template
+    def create_bucket(self, t, more_props=None):
         variables = self.get_variables()
-        t.add_resource(s3.Bucket('Bucket',
-                                 BucketName=Ref('BucketName'),
-                                 Tags=Tags(variables['tags'])))
+        bucket_properties = {
+            'BucketName': Ref('BucketName'),
+            'Tags': Tags(variables['tags']),
+        }
+        if more_props is not None:
+            bucket_properties.update(more_props)
+
+        bucket = s3.Bucket.from_dict('Bucket', bucket_properties)
+        t.add_resource(bucket)
+        return bucket
+
+    def create_exports(self, t):
+        variables = self.get_variables()
         for k, v in variables['exports'].iteritems():
             v = v.replace('$\{', '${')
             t.add_output(Output(k, Value=Sub(v), Export=Export(k)))
+
+    def create_template(self):
+        t = self.template
+        self.create_bucket(t)
+        self.create_exports(t)
+
+
+class BucketWithSns(Bucket):
+    def defined_variables(self):
+        variables = super(BucketWithSns, self).defined_variables()
+
+        additional = {
+            'InternalBucketName': {
+                'type': CFNString,
+                'description': 'Internal bucket name'
+            },
+        }
+
+        variables.update(additional)
+        return variables
+
+    def create_template(self):
+        t = self.template
+
+        topic_name = Sub("${InternalBucketName}CreateObjectTopic")
+        topic = sns.Topic('Topic',
+                          DisplayName=topic_name)
+        t.add_resource(topic)
+
+        policy = {
+            'Version': '2012-10-17',
+            'Statement': [
+                {
+                    'Effect': 'Allow',
+                    'Principal': {'AWS': '*'},
+                    'Action': 'sns:Publish',
+                    'Resource': Ref(topic),
+                    'Condition': {
+                        'ArnLike': {
+                            'aws:SourceArn': Sub('arn:aws:s3:::${BucketName}')
+                        }
+                    }
+                }
+            ]
+        }
+        t.add_resource(sns.TopicPolicy('TopicPolicy',
+                                       PolicyDocument=policy,
+                                       Topics=[Ref(topic)]))
+
+        more_bucket_props = {
+            'NotificationConfiguration': {
+                'TopicConfigurations': [
+                    {'Event': 's3:ObjectCreated:*', 'Topic': Ref(topic)}
+                ]
+            },
+        }
+
+        bucket = self.create_bucket(t, more_props=more_bucket_props)
+        bucket.DependsOn = ['Topic', 'TopicPolicy']
+
+        super(BucketWithSns, self).create_exports(t)
+
+        t.add_output(Output('CreateObjectTopicArn',
+                            Value=Ref(topic), Export=Export(Sub('${InternalBucketName}CreateObjectTopicArn'))))
