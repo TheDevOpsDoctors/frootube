@@ -10,10 +10,10 @@ Resources:
       Runtime: python3.6
       AutoPublishAlias: dev
       Environment:
-        DESTINATION_BUCKET: !ImportValue 'VideoDownloadBucket'
+        Variables:
+          DESTINATION_BUCKET: !ImportValue 'VideoDownloadBucket'
       Events:
         CreateEncodingJob:
-          Type: S3
+          Type: SNS
           Properties:
-            Bucket: !ImportValue 'VideoUploadBucket'
-            Events: s3:ObjectCreated:*
+            Topic: !ImportValue 'VideoUploadCreateObjectTopicArn'
