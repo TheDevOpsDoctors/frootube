@@ -23,12 +23,16 @@ class Bucket(Blueprint, Exporter):
             'type': CFNString,
             'description': 'S3 bucket Name',
         },
+        'public': {
+            'type': bool,
+            'default': False,
+        },
         'tags': {
             'type': dict,
         },
         'exports': {
             'type': dict,
-            'default': {}
+            'default': {},
         }
     }
 
@@ -43,6 +47,27 @@ class Bucket(Blueprint, Exporter):
 
         bucket = s3.Bucket.from_dict('Bucket', bucket_properties)
         t.add_resource(bucket)
+
+        if variables['public']:
+            policy_document = {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Action": [
+                            "s3:GetObject"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": Sub("arn:aws:s3:::${BucketName}/*"),
+                        "Principal": '*',
+                    }
+                ]
+            }
+
+            bucket_policy = s3.BucketPolicy('BucketPolicy',
+                                            Bucket=Ref('BucketName'),
+                                            PolicyDocument=policy_document)
+            t.add_resource(bucket_policy)
+
         return bucket
 
     def create_template(self):

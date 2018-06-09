@@ -29,6 +29,7 @@ stacks:
     enabled: true
     variables:
       BucketName: a1b1-${app}-${env}-video-download
+      public: true
       tags:
         <<: *common_tags
       exports:
