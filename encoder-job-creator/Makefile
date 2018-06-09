@@ -3,15 +3,15 @@ include ../config/variables.make.$(ENV)
 .PHONY: deploy
 
 output/package.zip: convert.py job.json
-	rm -f output/package.zip
-	zip -u output/package.zip convert.py job.json
+	rm -f '$@'
+	zip -u '$@' $^
 
-output/packaged-template.yaml: output/package.zip template.yaml
+output/packaged-template.yaml: template.yaml output/package.zip
 	aws cloudformation package \
 		--profile $(AWS_PROFILE) \
 		--region $(AWS_REGION) \
-		--template-file template.yaml \
-		--output-template-file output/packaged-template.yaml \
+		--template-file '$<' \
+		--output-template-file '$@' \
 		--s3-bucket a1b1-$(APP)-$(ENV)-deployment \
 		--s3-prefix packaged-functions
 
