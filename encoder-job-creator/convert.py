@@ -7,6 +7,13 @@ import uuid
 
 
 def handler(event, _context):
+    if os.environ.get('DEBUG') == 'true':
+        print(json.dumps(event))
+
+    event = json.loads(event['Records'][0]['Sns']['Message'])
+
+    if os.environ.get('DEBUG') == 'true':
+        print(json.dumps(event))
 
     asset_id = str(uuid.uuid4())
     source_s3_bucket = event['Records'][0]['s3']['bucket']['name']
@@ -22,8 +29,6 @@ def handler(event, _context):
     # Use MediaConvert SDK UserMetadata to tag jobs with the assetID
     # Events from MediaConvert will have the assetID in UserMedata
     job_metadata = {'assetID': asset_id}
-
-    print(json.dumps(event))
 
     try:
         # Job settings are in the lambda zip file in the current working directory
