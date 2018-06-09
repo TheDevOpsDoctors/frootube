@@ -21,4 +21,4 @@ deploy: output/packaged-template.yaml
 		--region $(AWS_REGION) \
 		--template-file '$<' \
 		--capabilities CAPABILITY_IAM \
-		--stack-name dev-encoder-job-creator
+		--stack-name dev-encoder-job-creator-function

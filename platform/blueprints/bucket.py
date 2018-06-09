@@ -11,7 +11,8 @@ from troposphere import (
     Output,
     Export,
     Sub,
-    sns)
+    sns
+)
 
 
 class Bucket(Blueprint):

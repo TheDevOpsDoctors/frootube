@@ -8,10 +8,12 @@ Resources:
       CodeUri: ./output/package.zip
       Handler: convert.handler
       Runtime: python3.6
+      Role: !ImportValue 'EncoderJobCreatorFunctionLambdaRoleArn'
       AutoPublishAlias: dev
       Environment:
         Variables:
           DESTINATION_BUCKET: !ImportValue 'VideoDownloadBucket'
+          MEDIA_CONVERT_ROLE: !ImportValue 'EncoderJobCreatorFunctionMediaConvertRoleArn'
       Events:
         CreateEncodingJob:
           Type: SNS

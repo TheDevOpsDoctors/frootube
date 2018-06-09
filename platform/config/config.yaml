@@ -33,3 +33,12 @@ stacks:
         <<: *common_tags
       exports:
         VideoDownloadBucket: '$\{BucketName}'
+  - name: encoder-job-creator-roles
+    class_path: blueprints.encoder_job_creator.Roles
+    enabled: true
+    variables:
+      tags:
+        <<: *common_tags
+      exports:
+        EncoderJobCreatorFunctionLambdaRoleArn: '$\{LambdaRole.Arn}'
+        EncoderJobCreatorFunctionMediaConvertRoleArn: '$\{MediaConvertRole.Arn}'
