@@ -14,8 +14,10 @@ from troposphere import (
     sns
 )
 
+from blueprints.exporter import Exporter
 
-class Bucket(Blueprint):
+
+class Bucket(Blueprint, Exporter):
     VARIABLES = {
         'BucketName': {
             'type': CFNString,
@@ -43,16 +45,10 @@ class Bucket(Blueprint):
         t.add_resource(bucket)
         return bucket
 
-    def create_exports(self, t):
-        variables = self.get_variables()
-        for k, v in variables['exports'].iteritems():
-            v = v.replace('$\{', '${')
-            t.add_output(Output(k, Value=Sub(v), Export=Export(k)))
-
     def create_template(self):
         t = self.template
         self.create_bucket(t)
-        self.create_exports(t)
+        self.create_exports()
 
 
 class BucketWithSns(Bucket):
@@ -108,7 +104,7 @@ class BucketWithSns(Bucket):
         bucket = self.create_bucket(t, more_props=more_bucket_props)
         bucket.DependsOn = ['Topic', 'TopicPolicy']
 
-        super(BucketWithSns, self).create_exports(t)
+        super(BucketWithSns, self).create_exports()
 
         t.add_output(Output('CreateObjectTopicArn',
                             Value=Ref(topic), Export=Export(Sub('${InternalBucketName}CreateObjectTopicArn'))))

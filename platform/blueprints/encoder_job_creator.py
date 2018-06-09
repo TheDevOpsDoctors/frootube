@@ -1,10 +1,12 @@
 from __future__ import print_function
 
 from stacker.blueprints.base import Blueprint
-from troposphere import iam, GetAtt, Output, Sub, Export
+from troposphere import iam, GetAtt
+
+from blueprints.exporter import Exporter
 
 
-class Roles(Blueprint):
+class Roles(Blueprint, Exporter):
     VARIABLES = {
         'tags': {
             'type': dict,
@@ -98,13 +100,6 @@ class Roles(Blueprint):
         t.add_resource(role)
 
         return role
-
-    def create_exports(self):
-        t = self.template
-        variables = self.get_variables()
-        for k, v in variables['exports'].iteritems():
-            v = v.replace('$\{', '${')
-            t.add_output(Output(k, Value=Sub(v), Export=Export(k)))
 
     def create_template(self):
         media_convert_role = self.create_media_convert_role()
