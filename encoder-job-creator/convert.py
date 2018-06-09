@@ -6,6 +6,16 @@ import os
 import uuid
 
 
+def extract_s3_url(job):
+    ogs = job['Job']['Settings']['OutputGroups']
+    og = next((x for x in ogs if x['CustomName'] == 'HLS'), None)
+    if not og:
+        raise Exception('Cannot find HLS Output Group!')
+
+    return og['OutputGroupSettings']['HlsGroupSettings']['Destination']
+
+
+
 def handler(event, _context):
     if os.environ.get('DEBUG') == 'true':
         print(json.dumps(event))
@@ -66,6 +76,8 @@ def handler(event, _context):
         # Convert the video using AWS Elemental MediaConvert
         job = client.create_job(Role=media_convert_role, UserMetadata=job_metadata, Settings=job_settings)
         print(json.dumps(job, default=str))
+
+        print(extract_s3_url(job))
 
     except Exception as e:
         print('Exception: %s' % e)
