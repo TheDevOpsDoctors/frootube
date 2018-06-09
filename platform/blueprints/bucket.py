@@ -45,6 +45,18 @@ class Bucket(Blueprint, Exporter):
         if more_props is not None:
             bucket_properties.update(more_props)
 
+        if variables['public']:
+            bucket_properties['CorsConfiguration'] = {
+                'CorsRules': [
+                    {
+                        'AllowedHeaders': ['Authorization', 'Content-*', 'Host'],
+                        'AllowedMethods': ['GET'],
+                        'AllowedOrigins': ['*'],
+                        'MaxAge': 3000,
+                    }
+                ]
+            }
+
         bucket = s3.Bucket.from_dict('Bucket', bucket_properties)
         t.add_resource(bucket)
 
