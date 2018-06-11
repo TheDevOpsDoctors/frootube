@@ -15,7 +15,6 @@ def extract_s3_url(job):
     return og['OutputGroupSettings']['HlsGroupSettings']['Destination']
 
 
-
 def handler(event, _context):
     if os.environ.get('DEBUG') == 'true':
         print(json.dumps(event))
@@ -38,7 +37,7 @@ def handler(event, _context):
 
     # Use MediaConvert SDK UserMetadata to tag jobs with the assetID
     # Events from MediaConvert will have the assetID in UserMedata
-    job_metadata = {'assetID': asset_id}
+    job_metadata = {'assetId': asset_id}
 
     try:
         # Job settings are in the lambda zip file in the current working directory
@@ -62,12 +61,8 @@ def handler(event, _context):
         job_settings['OutputGroups'][0]['OutputGroupSettings']['HlsGroupSettings']['Destination'] \
             = destination_s3 + '/' + s3_key_hls
 
-        s3_key_watermark = 'assets/' + asset_id + '/MP4/' + source_s3_basename
-        job_settings['OutputGroups'][1]['OutputGroupSettings']['FileGroupSettings']['Destination'] \
-            = destination_s3 + '/' + s3_key_watermark
-
         s3_key_thumbnails = 'assets/' + asset_id + '/Thumbnails/' + source_s3_basename
-        job_settings['OutputGroups'][2]['OutputGroupSettings']['FileGroupSettings']['Destination'] \
+        job_settings['OutputGroups'][1]['OutputGroupSettings']['FileGroupSettings']['Destination'] \
             = destination_s3 + '/' + s3_key_thumbnails
 
         print('jobSettings:')
