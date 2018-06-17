@@ -24,6 +24,8 @@ stacks:
       BucketName: a1b1-${app}-${env}-video-upload
       tags:
         <<: *common_tags
+      exports:
+        VideoUploadBucket: '$\{BucketName}'
   - name: video-download-bucket
     class_path: blueprints.bucket.Bucket
     enabled: true
@@ -43,3 +45,12 @@ stacks:
       exports:
         EncoderJobCreatorFunctionLambdaRoleArn: '$\{LambdaRole.Arn}'
         EncoderJobCreatorFunctionMediaConvertRoleArn: '$\{MediaConvertRole.Arn}'
+  - name: upload-link-generator-role
+    class_path: blueprints.upload_link_generator.Role
+    enabled: true
+    variables:
+      UploadBucket: '${output video-upload-bucket::VideoUploadBucket}'
+      tags:
+        <<: *common_tags
+      exports:
+        UploadLinkGeneratorFunctionLambdaRoleArn: '$\{LambdaRole.Arn}'
