@@ -5,6 +5,7 @@ import os
 import uuid
 
 import boto3
+from botocore.client import Config
 
 
 def handler(event, _context):
@@ -19,17 +20,17 @@ def handler(event, _context):
 
     try:
         s3 = boto3.client('s3', config=Config(signature_version='s3v4'))
-        url = s3.generate_presigned_url(
-            ClientMethod='put_object',
-            Params={
-                'Bucket': bucket,
-                'Key': filename,
-                'Metadata': {'id': media_id},
+        post = s3.generate_presigned_post(
+            Bucket=bucket,
+            Key=filename,
+            ExpiresIn=600,
+            Fields={
+                'x-amz-meta-id': media_id
             }
         )
 
         body = {
-            'url': url,
+            'post': post,
             'media_id': media_id,
             'filename': filename
         }
@@ -41,7 +42,7 @@ def handler(event, _context):
 
     finally:
         return {
-            'statusCode': status_code,
+            'StatusCode': status_code,
             'body': json.dumps(body),
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
         }
