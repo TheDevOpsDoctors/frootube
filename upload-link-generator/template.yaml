@@ -1,0 +1,15 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./output/package.zip
+      Handler: function.handler
+      Runtime: python3.6
+      Role: !ImportValue 'UploadLinkGeneratorFunctionLambdaRoleArn'
+      AutoPublishAlias: dev
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !ImportValue 'VideoUploadBucket'
