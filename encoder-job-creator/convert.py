@@ -43,7 +43,6 @@ def handler(event, _context):
         # Job settings are in the lambda zip file in the current working directory
         with open('job.json') as json_data:
             job_settings = json.load(json_data)
-            print(job_settings)
 
         # get the account-specific mediaconvert endpoint for this region
         mc_client = boto3.client('mediaconvert', region_name=region)
@@ -65,8 +64,9 @@ def handler(event, _context):
         job_settings['OutputGroups'][1]['OutputGroupSettings']['FileGroupSettings']['Destination'] \
             = destination_s3 + '/' + s3_key_thumbnails
 
-        print('jobSettings:')
-        print(json.dumps(job_settings))
+        if os.environ.get('DEBUG') == 'true':
+            print('jobSettings:')
+            print(json.dumps(job_settings))
 
         # Convert the video using AWS Elemental MediaConvert
         job = client.create_job(Role=media_convert_role, UserMetadata=job_metadata, Settings=job_settings)
