@@ -25,8 +25,11 @@ def handler(event, _context):
             Key=filename,
             ExpiresIn=600,
             Fields={
-                'x-amz-meta-id': media_id
-            }
+                'x-amz-meta-id': media_id,
+            },
+            Conditions=[
+                {'x-amz-meta-id': media_id},
+            ]
         )
 
         body = {
@@ -42,7 +45,7 @@ def handler(event, _context):
 
     finally:
         return {
-            'StatusCode': status_code,
+            'statusCode': status_code,
             'body': json.dumps(body),
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
         }

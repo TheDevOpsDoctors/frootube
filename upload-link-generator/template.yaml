@@ -13,3 +13,9 @@ Resources:
       Environment:
         Variables:
           UPLOAD_BUCKET: !ImportValue 'VideoUploadBucket'
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
