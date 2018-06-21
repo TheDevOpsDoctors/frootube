@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import boto3
 import json
 import os
-import uuid
+import re
+
+import boto3
 
 
 def extract_s3_url(job):
@@ -15,6 +16,11 @@ def extract_s3_url(job):
     return og['OutputGroupSettings']['HlsGroupSettings']['Destination']
 
 
+def extract_asset_id(key):
+    regex = re.compile('^upload/')
+    return regex.sub('', key)
+
+
 def handler(event, _context):
     if os.environ.get('DEBUG') == 'true':
         print(json.dumps(event))
@@ -24,16 +30,15 @@ def handler(event, _context):
     if os.environ.get('DEBUG') == 'true':
         print(json.dumps(event))
 
-    asset_id = str(uuid.uuid4())
     source_s3_bucket = event['Records'][0]['s3']['bucket']['name']
     source_s3_key = event['Records'][0]['s3']['object']['key']
     source_s3 = 's3://' + source_s3_bucket + '/' + source_s3_key
-    source_s3_basename = os.path.splitext(os.path.basename(source_s3))[0]
     destination_s3 = 's3://' + os.environ['DESTINATION_BUCKET']
     media_convert_role = os.environ['MEDIA_CONVERT_ROLE']
     region = os.environ['AWS_DEFAULT_REGION']
     status_code = 200
     body = {}
+    asset_id = extract_asset_id(source_s3_key)
 
     # Use MediaConvert SDK UserMetadata to tag jobs with the assetID
     # Events from MediaConvert will have the assetID in UserMedata
@@ -56,11 +61,11 @@ def handler(event, _context):
         # paths for converted videos
         job_settings['Inputs'][0]['FileInput'] = source_s3
 
-        s3_key_hls = 'assets/' + asset_id + '/HLS/' + source_s3_basename
+        s3_key_hls = 'assets/' + asset_id + '/HLS/video'
         job_settings['OutputGroups'][0]['OutputGroupSettings']['HlsGroupSettings']['Destination'] \
             = destination_s3 + '/' + s3_key_hls
 
-        s3_key_thumbnails = 'assets/' + asset_id + '/Thumbnails/' + source_s3_basename
+        s3_key_thumbnails = 'assets/' + asset_id + '/Thumbnails/image'
         job_settings['OutputGroups'][1]['OutputGroupSettings']['FileGroupSettings']['Destination'] \
             = destination_s3 + '/' + s3_key_thumbnails
 
