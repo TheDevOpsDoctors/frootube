@@ -1,0 +1,46 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<form id="form" action="http://example.com/" method="post" enctype="multipart/form-data">
+    <fieldset id="form-wrapper">
+        <p id="uploading-msg" style="display: none">Uploading....</p>
+        <div id="fields">
+        </div>
+        <div>
+            File:<input type="file" name="file">
+        </div>
+        <div>
+            <input type="submit" name="submit" value="Upload to Amazon S3">
+        </div>
+    </fieldset>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script type="application/javascript">
+    window.App = {};
+    jQuery('#form').submit(function () {
+        jQuery('#uploading-msg').show();
+        jQuery('#form-wrapper').attr('disabled', '');
+    }).ajaxForm(function () {
+        alert('File uploaded!');
+        location.href = "https://video-dev.github.io/hls.js/demo/?demoConfig=eyJlbmFibGVTdHJlYW1pbmciOnRydWUsImF1dG9SZWNvdmVyRXJyb3IiOnRydWUsImVuYWJsZVdvcmtlciI6dHJ1ZSwiZHVtcGZNUDQiOmZhbHNlLCJsZXZlbENhcHBpbmciOi0xLCJsaW1pdE1ldHJpY3MiOi0xLCJ3aWRldmluZUxpY2Vuc2VVcmwiOiIifQ==&" +
+            `src=https://s3-eu-west-1.amazonaws.com/a1b1-frootube-dev-video-download/assets/${App.mediaId}/HLS/video.m3u8`;
+    });
+
+    jQuery.post('https://92cqdx9c6d.execute-api.eu-west-1.amazonaws.com/Prod/', function (response) {
+        console.log({'response': response});
+        let form = jQuery('#form'), fields=$('#fields');
+        App.mediaId = response.media_id;
+        form.attr('action', response.post.url);
+        for (const prop in response.post.fields) {
+            const value = response.post.fields[prop];
+            let newField = $(`<input type="hidden" name="${prop}" value="${value}">`);
+            fields.append(newField);
+        }
+    });
+</script>
+</body>
+</html>
