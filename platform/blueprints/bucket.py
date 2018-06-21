@@ -27,6 +27,10 @@ class Bucket(Blueprint, Exporter):
             'type': bool,
             'default': False,
         },
+        'public_post': {
+            'type': bool,
+            'default': False,
+        },
         'tags': {
             'type': dict,
         },
@@ -51,6 +55,18 @@ class Bucket(Blueprint, Exporter):
                     {
                         'AllowedHeaders': ['Authorization', 'Content-*', 'Host'],
                         'AllowedMethods': ['GET'],
+                        'AllowedOrigins': ['*'],
+                        'MaxAge': 3000,
+                    }
+                ]
+            }
+
+        if variables['public_post']:
+            bucket_properties['CorsConfiguration'] = {
+                'CorsRules': [
+                    {
+                        'AllowedHeaders': ['Authorization', 'Content-*', 'Host'],
+                        'AllowedMethods': ['POST'],
                         'AllowedOrigins': ['*'],
                         'MaxAge': 3000,
                     }

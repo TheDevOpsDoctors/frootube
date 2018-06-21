@@ -22,6 +22,7 @@ stacks:
     variables:
       InternalBucketName: VideoUpload
       BucketName: a1b1-${app}-${env}-video-upload
+      public_post: true
       tags:
         <<: *common_tags
       exports:
