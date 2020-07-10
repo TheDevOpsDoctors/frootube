@@ -21,3 +21,4 @@ var/
 
 # Project
 /.env
+/.python-version

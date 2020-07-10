@@ -20,6 +20,10 @@ service: frootube
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+custom:
+  generic_bucket_prefix: "com-cloudership-${self:provider.region}"
+  bucket_prefix: "${self:custom.generic_bucket_prefix}-${self:service}"
+
 provider:
   name: aws
   runtime: python3.8
@@ -49,9 +53,11 @@ provider:
   # you can define service wide environment variables here
   #  environment:
   #    variable1: value1
+  environment:
+    UPLOAD_BUCKET: "${self:custom.bucket_prefix}-upload"
 
   deploymentBucket:
-    name: com-cloudership-${self:provider.region}-deployment-support
+    name: "${self:custom.generic_bucket_prefix}-deployment-support"
     maxPreviousDeploymentArtifacts: 3
     blockPublicAccess: true
 
@@ -65,8 +71,13 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  upload-link-generator:
+  uploadLinkGenerator:
     handler: upload_link_generator.handler
+    memorySize: 256
+    events:
+      - http:
+          path: upload-link
+          method: post
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
