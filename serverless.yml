@@ -23,6 +23,7 @@ service: frootube
 custom:
   generic_bucket_prefix: "com-cloudership-${self:provider.region}"
   bucket_prefix: "${self:custom.generic_bucket_prefix}-${self:service}"
+  video_upload_bucket_name: "${self:custom.bucket_prefix}-video-upload"
 
 provider:
   name: aws
@@ -49,12 +50,18 @@ provider:
   #          - - "arn:aws:s3:::"
   #            - "Ref" : "ServerlessDeploymentBucket"
   #            - "/*"
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "s3:putObject"
+      Resource:
+        - "arn:aws:s3:::${self:custom.video_upload_bucket_name}/*"
 
   # you can define service wide environment variables here
   #  environment:
   #    variable1: value1
   environment:
-    UPLOAD_BUCKET: "${self:custom.bucket_prefix}-upload"
+    UPLOAD_BUCKET: "${self:custom.video_upload_bucket_name}"
 
   deploymentBucket:
     name: "${self:custom.generic_bucket_prefix}-deployment-support"
@@ -130,3 +137,18 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+resources:
+  Resources:
+    VideoUploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${self:custom.video_upload_bucket_name}"
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['Authorization', 'Content-*', 'Host']
+              AllowedMethods: ['POST']
+              AllowedOrigins: ['*']
+              MaxAge: 3000
+        Tags:
+          - { Key: Service, Value: "${self:service}" }
