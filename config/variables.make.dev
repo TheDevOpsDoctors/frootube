@@ -1,4 +1,4 @@
-AWS_PROFILE=frootube-$(ENV)
+AWS_PROFILE=a1b1-playground
 AWS_DEFAULT_REGION=eu-west-1
 AWS_REGION=$(AWS_DEFAULT_REGION)
 APP=frootube
