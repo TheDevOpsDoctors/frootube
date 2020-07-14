@@ -1,0 +1,44 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<form id="form" action="https://com-cloudership-eu-west-1-frootube-video-upload.s3.amazonaws.com/" method="post" enctype="multipart/form-data">
+    <fieldset id="form-wrapper">
+        <p id="uploading-msg" style="display: none">Uploading....</p>
+        <div id="fields">
+            <input type="hidden" name="x-amz-meta-id" value="deadbeef" />
+            <input type="hidden" name="key" value="test-upload.mkv" />
+            <input type="hidden" name="x-amz-algorithm" value="AWS4-HMAC-SHA256" />
+            <input type="hidden" name="x-amz-credential" value="ASIAUVLCVIIBRP47JP4H/20200713/eu-west-1/s3/aws4_request" />
+            <input type="hidden" name="x-amz-date" value="20200713T235952Z" />
+            <input type="hidden" name="x-amz-security-token" value="FwoGZXIvYXdzEOn//////////wEaDNkMRCP5YizHmIlzFSK/AbBqigUdN4Yf8RwQwLpledZ1I2ZSyrvC8eJz3owlwUgBoqs1PmW9s+WBCaS1nGTAi/i5EvuKnmFsvU9KF8lx3SoXPVeez4RXHqiLV5oPp8skqC1oGy34a58IgA8dbbMKh0acrFbqqa8MRCzZiIuik0pWDfr8eQv4B14SEd7K6ro6/Y1DdpW2mDoo2tP71sm/30jChIcqsNIcxqbJxRZFJIxtILfWjnbk14ONh4lIqj2FoqMD5Ii8EyEZEe/CjoDKKPXqs/gFMi2RC9FPc1tPMnWkJsOFkYIVeUsVAnfSZ1Zq3f0ocGY/HaD8bsjAE8J0b03IkCw=" />
+            <input type="hidden" name="policy" value="eyJleHBpcmF0aW9uIjogIjIwMjAtMDctMTRUMDA6NTk6NTFaIiwgImNvbmRpdGlvbnMiOiBbeyJ4LWFtei1tZXRhLWlkIjogImRlYWRiZWVmIn0sIHsiYnVja2V0IjogImNvbS1jbG91ZGVyc2hpcC1ldS13ZXN0LTEtZnJvb3R1YmUtdmlkZW8tdXBsb2FkIn0sIHsia2V5IjogInRlc3QtdXBsb2FkLm1rdiJ9LCB7IngtYW16LWFsZ29yaXRobSI6ICJBV1M0LUhNQUMtU0hBMjU2In0sIHsieC1hbXotY3JlZGVudGlhbCI6ICJBU0lBVVZMQ1ZJSUJSUDQ3SlA0SC8yMDIwMDcxMy9ldS13ZXN0LTEvczMvYXdzNF9yZXF1ZXN0In0sIHsieC1hbXotZGF0ZSI6ICIyMDIwMDcxM1QyMzU5NTJaIn0sIHsieC1hbXotc2VjdXJpdHktdG9rZW4iOiAiRndvR1pYSXZZWGR6RU9uLy8vLy8vLy8vL3dFYUROa01SQ1A1WWl6SG1JbHpGU0svQWJCcWlnVWRONFlmOFJ3UXdMcGxlZFoxSTJaU3lydkM4ZUp6M293bHdVZ0JvcXMxUG1XOXMrV0JDYVMxbkdUQWkvaTVFdnVLbm1Gc3ZVOUtGOGx4M1NvWFBWZWV6NFJYSHFpTFY1b1BwOHNrcUMxb0d5MzRhNThJZ0E4ZGJiTUtoMGFjckZicXFhOE1SQ3paaUl1aWswcFdEZnI4ZVF2NEIxNFNFZDdLNnJvNi9ZMURkcFcybURvbzJ0UDcxc20vMzBqQ2hJY3FzTkljeHFiSnhSWkZKSXh0SUxmV2puYmsxNE9OaDRsSXFqMkZvcU1ENUlpOEV5RVpFZS9Dam9ES0tQWHFzL2dGTWkyUkM5RlBjMXRQTW5Xa0pzT0ZrWUlWZVVzVkFuZlNaMVpxM2Ywb2NHWS9IYUQ4YnNqQUU4SjBiMDNJa0N3PSJ9XX0=" />
+            <input type="hidden" name="x-amz-signature" value="eed954ee70b78826b5f8a996ece0a16a8384acd6af52d108733f195ccae9a5ee" />
+        </div>
+        <div>
+            File:<input type="file" name="file">
+        </div>
+        <div>
+            <input type="submit" name="submit" value="Upload to Amazon S3">
+        </div>
+    </fieldset>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script type="application/javascript">
+    window.App = {};
+    jQuery('#form').submit(function () {
+        jQuery('#uploading-msg').show();
+        jQuery('#form-wrapper').attr('disabled', '');
+    }).ajaxForm(function () {
+        alert('File uploaded!');
+        // location.href = "https://video-dev.github.io/hls.js/demo/?demoConfig=eyJlbmFibGVTdHJlYW1pbmciOnRydWUsImF1dG9" +
+        //     "SZWNvdmVyRXJyb3IiOnRydWUsImVuYWJsZVdvcmtlciI6dHJ1ZSwiZHVtcGZNUDQiOmZhbHNlLCJsZXZlbENhcHBpbmciOi0xLCJsa" +
+        //     "W1pdE1ldHJpY3MiOi0xLCJ3aWRldmluZUxpY2Vuc2VVcmwiOiIifQ==&" +
+        //     `src=https://s3-eu-west-1.amazonaws.com/a1b1-frootube-dev-video-download/assets/${App.mediaId}/HLS/video.m3u8`;
+    });
+</script>
+</body>
+</html>
