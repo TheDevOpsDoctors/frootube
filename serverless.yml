@@ -24,6 +24,7 @@ custom:
   generic_bucket_prefix: "com-cloudership-${self:provider.region}"
   bucket_prefix: "${self:custom.generic_bucket_prefix}-${self:service}"
   video_upload_bucket_name: "${self:custom.bucket_prefix}-video-upload"
+  video_download_bucket_name: "${self:custom.bucket_prefix}-video-download"
 
 provider:
   name: aws
@@ -62,6 +63,7 @@ provider:
   #    variable1: value1
   environment:
     UPLOAD_BUCKET: "${self:custom.video_upload_bucket_name}"
+    VIDEO_DOWNLOAD_BUCKET: "${self:custom.video_download_bucket_name}"
 
   deploymentBucket:
     name: "${self:custom.generic_bucket_prefix}-deployment-support"
@@ -176,3 +178,26 @@ resources:
                 ArnLike:
                   aws:SourceArn: "arn:aws:s3:::${self:custom.video_upload_bucket_name}"
         Topics: [!Ref VideoUploadBucketCreateObjectTopic]
+    VideoDownloadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${self:custom.video_download_bucket_name}"
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['Authorization', 'Content-*', 'Host']
+              AllowedMethods: ['GET']
+              AllowedOrigins: ['*']
+              MaxAge: 3000
+        Tags:
+          - { Key: Service, Value: "${self:service}" }
+    VideoDownloadBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref VideoDownloadBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action: "s3:GetObject"
+              Effect: "Allow"
+              Resource: "arn:aws:s3:::${self:custom.video_download_bucket_name}/*"
+              Principal: '*'
