@@ -36,7 +36,7 @@
         console.log({'response': response});
         let form = jQuery('#form'), fields = $('#fields');
         App.mediaId = response.media_id;
-        form.attr('action', response.post.url);
+        form.attr('action', response.post.url.replace(".s3.", ".s3-eu-west-1."));
         for (const prop in response.post.fields) {
             const value = response.post.fields[prop];
             let newField = $(`<input type="hidden" name="${prop}" value="${value}">`);
