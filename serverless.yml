@@ -150,5 +150,29 @@ resources:
               AllowedMethods: ['POST']
               AllowedOrigins: ['*']
               MaxAge: 3000
+        NotificationConfiguration:
+          TopicConfigurations:
+            - Event: "s3:ObjectCreated:*"
+              Topic: !Ref VideoUploadBucketCreateObjectTopic
         Tags:
           - { Key: Service, Value: "${self:service}" }
+    VideoUploadBucketCreateObjectTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: VideoUploadBucketCreateObjectTopic
+        Tags:
+          - { Key: Service, Value: "${self:service}" }
+    VideoUploadBucketCreateObjectTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: { AWS: "*" }
+              Action: "sns:Publish"
+              Resource: !Ref VideoUploadBucketCreateObjectTopic
+              Condition:
+                ArnLike:
+                  aws:SourceArn: "arn:aws:s3:::${self:custom.video_upload_bucket_name}"
+        Topics: [!Ref VideoUploadBucketCreateObjectTopic]
