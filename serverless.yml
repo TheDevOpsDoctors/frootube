@@ -25,7 +25,7 @@ custom:
   bucket_prefix: "${self:custom.generic_bucket_prefix}-${self:service}"
   video_upload_bucket_name: "${self:custom.bucket_prefix}-video-upload"
   video_download_bucket_name: "${self:custom.bucket_prefix}-video-download"
-
+  video_upload_bucket_create_object_topic: "VideoUploadBucketCreateObjectTopic"
 provider:
   name: aws
   runtime: python3.8
@@ -57,36 +57,57 @@ provider:
         - "s3:putObject"
       Resource:
         - "arn:aws:s3:::${self:custom.video_upload_bucket_name}/*"
+    - Effect: Allow
+      Action:
+        - "mediaconvert:*"
+      Resource: "*"
+    - Effect: Allow
+      Action: "iam:PassRole"
+      Resource: !GetAtt MediaConvertRole.Arn
 
   # you can define service wide environment variables here
   #  environment:
   #    variable1: value1
-  environment:
-    UPLOAD_BUCKET: "${self:custom.video_upload_bucket_name}"
-    VIDEO_DOWNLOAD_BUCKET: "${self:custom.video_download_bucket_name}"
 
   deploymentBucket:
     name: "${self:custom.generic_bucket_prefix}-deployment-support"
     maxPreviousDeploymentArtifacts: 3
     blockPublicAccess: true
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.py
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.py
-#    - exclude-me-dir/**
+  # you can add packaging information here
+  #package:
+  #  include:
+  #    - include-me.py
+  #    - include-me-dir/**
+  #  exclude:
+  #    - exclude-me.py
+  #    - exclude-me-dir/**
+  include:
+    - encoder-job-creator-media-convert-config.json
 
 functions:
+
   uploadLinkGenerator:
     handler: upload_link_generator.handler
     memorySize: 256
+    environment:
+      UPLOAD_BUCKET: "${self:custom.video_upload_bucket_name}"
     events:
       - http:
           path: upload-link
           method: post
+
+  encoderJobCreator:
+    handler: encoder_job_creator.handler
+    memorySize: 256
+    environment:
+      DEBUG: true
+      DESTINATION_BUCKET: "${self:custom.video_download_bucket_name}"
+      MEDIA_CONVERT_ROLE: !GetAtt MediaConvertRole.Arn
+    events:
+      - sns:
+          arn: !Ref VideoUploadBucketCreateObjectTopic
+          topicName: "${self:custom.video_upload_bucket_create_object_topic}"
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -161,7 +182,8 @@ resources:
     VideoUploadBucketCreateObjectTopic:
       Type: AWS::SNS::Topic
       Properties:
-        DisplayName: VideoUploadBucketCreateObjectTopic
+        TopicName: "${self:custom.video_upload_bucket_create_object_topic}"
+        DisplayName: "${self:custom.video_upload_bucket_create_object_topic}"
         Tags:
           - { Key: Service, Value: "${self:service}" }
     VideoUploadBucketCreateObjectTopicPolicy:
@@ -201,3 +223,25 @@ resources:
               Effect: "Allow"
               Resource: "arn:aws:s3:::${self:custom.video_download_bucket_name}/*"
               Principal: '*'
+    MediaConvertRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: { Service: "mediaconvert.amazonaws.com" }
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: "MediaConvertRolePolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action: "s3:*"
+                  Resource:
+                    - "arn:aws:s3:::${self:custom.video_download_bucket_name}/*"
+                - Effect: "Allow"
+                  Action: "s3:Get*"
+                  Resource:
+                    - "arn:aws:s3:::${self:custom.video_upload_bucket_name}/upload/*"
